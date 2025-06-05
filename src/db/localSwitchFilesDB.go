@@ -17,7 +17,7 @@ import (
 
 var (
 	versionRegex = regexp.MustCompile(`\[[vV]?(?P<version>[0-9]{1,10})]`)
-	titleIdRegex = regexp.MustCompile(`\[(?P<titleId>[A-Z,a-z0-9]{16})]`)
+	titleIdRegex = regexp.MustCompile(`\[(?P<titleId>[A-Za-z0-9]{16})]`)
 )
 
 const (
