@@ -31,7 +31,7 @@ func DeleteOldUpdates(baseFolder string, localDB *db.LocalSwitchFilesDB, updateP
 				updateProgress.UpdateProgress(0, 0, "deleting "+fileToRemove)
 			}
 			zap.S().Infof("Deleting file: %v \n", fileToRemove)
-			err := os.Remove(fileToRemove)
+			err := deleteFileWithSplits(fileToRemove)
 			if err != nil {
 				zap.S().Errorf("Failed to delete file  %v  [%v]\n", fileToRemove, err)
 				continue
@@ -43,7 +43,7 @@ func DeleteOldUpdates(baseFolder string, localDB *db.LocalSwitchFilesDB, updateP
 				updateProgress.UpdateProgress(0, 0, "deleting "+fileToRemove)
 			}
 			zap.S().Infof("Deleting file: %v \n", fileToRemove)
-			err := os.Remove(fileToRemove)
+			err := deleteFileWithSplits(fileToRemove)
 			if err != nil {
 				zap.S().Errorf("Failed to delete file  %v  [%v]\n", fileToRemove, err)
 				continue
@@ -470,5 +470,27 @@ func deleteEmptyFolder(path string) error {
 	zap.S().Infof("\nDeleting empty folder [%v]", path)
 	_ = os.Remove(path)
 
+	return nil
+}
+
+func deleteFileWithSplits(filePath string) error {
+	err := os.Remove(filePath)
+	if err != nil {
+		return err
+	}
+
+	if len(filePath) > 2 {
+		suffix := filePath[len(filePath)-2:]
+		if _, err := strconv.Atoi(suffix); err == nil {
+			base := filePath[:len(filePath)-2]
+			matches, _ := filepath.Glob(base + "*")
+			for _, f := range matches {
+				if f == filePath {
+					continue
+				}
+				_ = os.Remove(f)
+			}
+		}
+	}
 	return nil
 }
