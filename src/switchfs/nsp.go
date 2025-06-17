@@ -3,23 +3,49 @@ package switchfs
 import (
 	"bytes"
 	"errors"
-	"go.uber.org/zap"
+	"io"
+	"os"
 	"strings"
+
+	"github.com/klauspost/compress/zstd"
+	"go.uber.org/zap"
 )
 
 func ReadNspMetadata(filePath string) (map[string]*ContentMetaAttributes, error) {
+	var reader io.ReaderAt
+	var closer io.Closer
+	var pfs0 *PFS0
+	var err error
 
-	pfs0, err := ReadPfs0File(filePath)
-	if err != nil {
-		return nil, errors.New("Invalid NSP file, reason - [" + err.Error() + "]")
+	if strings.HasSuffix(strings.ToLower(filePath), ".nsz") {
+		data, err := decompressNSZ(filePath)
+		if err != nil {
+			return nil, err
+		}
+		br := bytes.NewReader(data)
+		reader = br
+		closer = nil
+		pfs0, err = readPfs0(br, 0x0)
+	} else {
+		pfs0, err = ReadPfs0File(filePath)
+		if err != nil {
+			return nil, errors.New("Invalid NSP file, reason - [" + err.Error() + "]")
+		}
+		file, err := OpenFile(filePath)
+		if err != nil {
+			return nil, err
+		}
+		reader = file
+		closer = file
 	}
 
-	file, err := OpenFile(filePath)
 	if err != nil {
 		return nil, err
 	}
 
-	defer file.Close()
+	if closer != nil {
+		defer closer.Close()
+	}
 
 	contentMap := map[string]*ContentMetaAttributes{}
 
@@ -28,7 +54,7 @@ func ReadNspMetadata(filePath string) (map[string]*ContentMetaAttributes, error)
 		fileOffset := int64(pfs0File.StartOffset)
 
 		if strings.Contains(pfs0File.Name, "cnmt.nca") {
-			_, section, err := openMetaNcaDataSection(file, fileOffset)
+			_, section, err := openMetaNcaDataSection(reader, fileOffset)
 			if err != nil {
 				return nil, err
 			}
@@ -41,7 +67,7 @@ func ReadNspMetadata(filePath string) (map[string]*ContentMetaAttributes, error)
 				return nil, err
 			}
 			if currCnmt.Type != "DLC" {
-				nacp, err := ExtractNacp(currCnmt, file, pfs0, 0)
+				nacp, err := ExtractNacp(currCnmt, reader, pfs0, 0)
 				if err != nil {
 					zap.S().Debug("Failed to extract nacp [%v]\n", err.Error())
 				}
@@ -66,4 +92,24 @@ func ReadNspMetadata(filePath string) (map[string]*ContentMetaAttributes, error)
 	}
 	return contentMap, nil
 
+}
+
+func decompressNSZ(path string) ([]byte, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	zr, err := zstd.NewReader(f)
+	if err != nil {
+		return nil, err
+	}
+	defer zr.Close()
+
+	data, err := io.ReadAll(zr)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
 }
