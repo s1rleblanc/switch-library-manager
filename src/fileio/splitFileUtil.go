@@ -14,7 +14,7 @@ func ReadSplitFileMetadata(filePath string) (map[string]*switchfs.ContentMetaAtt
 	if err != nil {
 		_, err = readXciHeader(filePath)
 		if err != nil {
-			return nil, errors.New("split file is not an XCI/XCZ or NSP/NSZ")
+			return nil, errors.New("split file is not an XCI/XCZ or NSP/NSZ/NCZ")
 		}
 		isXCI = true
 	}

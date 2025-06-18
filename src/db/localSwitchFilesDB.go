@@ -205,9 +205,9 @@ func (ldb *LocalSwitchDBManager) processLocalFiles(files []ExtendedFileInfo,
 			}
 		}
 
-		// only handle XCI/XCZ and NSP/NSZ files
+		// only handle XCI/XCZ and NSP/NSZ/NCZ files
 		fileExtension := filepath.Ext(fileName)
-		if !isSplit && fileExtension != ".xci" && fileExtension != ".xcz" && fileExtension != ".nsp" && fileExtension != ".nsz" {
+		if !isSplit && fileExtension != ".xci" && fileExtension != ".xcz" && fileExtension != ".nsp" && fileExtension != ".nsz" && fileExtension != ".ncz" {
 			if _, ok := ignoreFileTypes[fileExtension]; !ok {
 				skipped[file] = SkippedFile{ReasonCode: REASON_UNSUPPORTED_TYPE, ReasonText: "file type is not supported"}
 			}
@@ -324,7 +324,8 @@ func (ldb *LocalSwitchDBManager) getGameMetadata(file ExtendedFileInfo,
 
 		fileName := strings.ToLower(file.FileName)
 		if strings.HasSuffix(fileName, "nsp") ||
-			strings.HasSuffix(fileName, "nsz") {
+			strings.HasSuffix(fileName, "nsz") ||
+			strings.HasSuffix(fileName, "ncz") {
 			metadata, err = switchfs.ReadNspMetadata(filePath)
 			if err != nil {
 				skipped[file] = SkippedFile{ReasonCode: REASON_MALFORMED_FILE, ReasonText: fmt.Sprintf("failed to read NSP [reason: %v]", err)}

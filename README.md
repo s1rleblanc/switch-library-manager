@@ -14,8 +14,8 @@ Easily manage your switch game backups
 
 - Cross platform, works on Windows / Mac / Linux
 - GUI and command line interfaces
-- Scan your local switch backup library (NSP/NSZ/XCI)
-- Read titleId/version by decrypting NSP/XCI/NSZ (requires prod.keys)
+- Scan your local switch backup library (NSP/NSZ/NCZ/XCI)
+- Read titleId/version by decrypting NSP/XCI/NSZ/NCZ (requires prod.keys)
 - If no prod.keys present, fallback to read titleId/version by parsing file name (example: `Super Mario Odyssey [0100000000010000][v0].nsp`).
 - Lists missing update files (for games and DLC)
 - Lists missing DLCs
