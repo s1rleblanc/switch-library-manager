@@ -132,9 +132,9 @@ func (c *Console) Start() {
 	}
 	c.processIssues(localDB, issuesCsvFile)
 
-	if settingsObj.OrganizeOptions.DeleteOldUpdateFiles {
+	if settingsObj.OrganizeOptions.DeleteOldUpdateFiles || settingsObj.OrganizeOptions.DeleteDuplicateFiles {
 		progressBar = progressbar.New(2000)
-		fmt.Printf("\nDeleting old updates\n")
+		fmt.Printf("\nDeleting old/duplicate files\n")
 		process.DeleteOldUpdates(c.baseFolder, localDB, c)
 		progressBar.Finish()
 	}

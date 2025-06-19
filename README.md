@@ -60,6 +60,7 @@ You can customize the folder/file re-naming, as well as turn on/off features, an
   "updates_folder": "", # ex change to Updates to place update folder in a separate folder
   "rename_files": false,
   "delete_empty_folders": false,
+  "delete_duplicate_files": false,
   "delete_old_update_files": false,
   "folder_name_template": "{TITLE_NAME}",
   "switch_safe_file_names": true,
