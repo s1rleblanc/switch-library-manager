@@ -42,6 +42,7 @@ type OrganizeOptions struct {
 	UpdatesFolder              string `json:"updates_folder"`
 	RenameFiles                bool   `json:"rename_files"`
 	DeleteEmptyFolders         bool   `json:"delete_empty_folders"`
+	DeleteDuplicateFiles       bool   `json:"delete_duplicate_files"`
 	DeleteOldUpdateFiles       bool   `json:"delete_old_update_files"`
 	FolderNameTemplate         string `json:"folder_name_template"`
 	SwitchSafeFileNames        bool   `json:"switch_safe_file_names"`
@@ -86,7 +87,7 @@ func ReadSettings(baseFolder string) *AppSettings {
 		return settingsInstance
 	}
 	settingsInstance = &AppSettings{Debug: false, GuiPagingSize: 100, ScanFolders: []string{},
-		OrganizeOptions: OrganizeOptions{SwitchSafeFileNames: true}, Prodkeys: "", IgnoreDLCTitleIds: []string{"01007F600B135007"}}
+		OrganizeOptions: OrganizeOptions{SwitchSafeFileNames: true, DeleteDuplicateFiles: false, DeleteOldUpdateFiles: false}, Prodkeys: "", IgnoreDLCTitleIds: []string{"01007F600B135007"}}
 	if _, err := os.Stat(filepath.Join(baseFolder, SETTINGS_FILENAME)); err == nil {
 		file, err := os.Open(filepath.Join(baseFolder, SETTINGS_FILENAME))
 		if err != nil {
@@ -154,6 +155,7 @@ func saveDefaultSettings(baseFolder string) *AppSettings {
 			FileNameTemplate: fmt.Sprintf("{%v} ({%v})[{%v}][v{%v}]", TEMPLATE_TITLE_NAME, TEMPLATE_DLC_NAME,
 				TEMPLATE_TITLE_ID, TEMPLATE_VERSION),
 			DeleteEmptyFolders:         false,
+			DeleteDuplicateFiles:       false,
 			SwitchSafeFileNames:        true,
 			DeleteOldUpdateFiles:       false,
 			ProcessWhenMissingBaseGame: false,

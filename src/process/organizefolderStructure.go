@@ -22,10 +22,14 @@ var (
 )
 
 func DeleteOldUpdates(baseFolder string, localDB *db.LocalSwitchFilesDB, updateProgress db.ProgressUpdater) {
+	opts := settings.ReadSettings(baseFolder).OrganizeOptions
 	i := 0
 	for k, v := range localDB.Skipped {
 		switch v.ReasonCode {
 		case db.REASON_DUPLICATE:
+			if !opts.DeleteDuplicateFiles {
+				continue
+			}
 			fileToRemove := filepath.Join(k.BaseFolder, k.FileName)
 			if updateProgress != nil {
 				updateProgress.UpdateProgress(0, 0, "deleting "+fileToRemove)
@@ -38,6 +42,9 @@ func DeleteOldUpdates(baseFolder string, localDB *db.LocalSwitchFilesDB, updateP
 			}
 			i++
 		case db.REASON_OLD_UPDATE:
+			if !opts.DeleteOldUpdateFiles {
+				continue
+			}
 			fileToRemove := filepath.Join(k.BaseFolder, k.FileName)
 			if updateProgress != nil {
 				updateProgress.UpdateProgress(0, 0, "deleting "+fileToRemove)
